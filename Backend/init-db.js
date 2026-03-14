@@ -9,7 +9,7 @@ const initDb = async () => {
                 title VARCHAR(255) NOT NULL,
                 description TEXT,
                 budget DECIMAL(10,2),
-                client_id INTEGER REFERENCES users(id),
+                client_id UUID REFERENCES users(id),
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             );
         `);
@@ -19,7 +19,7 @@ const initDb = async () => {
             CREATE TABLE IF NOT EXISTS proposals (
                 id SERIAL PRIMARY KEY,
                 project_id INTEGER REFERENCES projects(id),
-                freelancer_id INTEGER REFERENCES users(id),
+                freelancer_id UUID REFERENCES users(id),
                 message TEXT,
                 price DECIMAL(10,2),
                 status VARCHAR(50) DEFAULT 'pending',
@@ -32,8 +32,8 @@ const initDb = async () => {
             CREATE TABLE IF NOT EXISTS contracts (
                 id SERIAL PRIMARY KEY,
                 project_id INTEGER REFERENCES projects(id),
-                client_id INTEGER REFERENCES users(id),
-                freelancer_id INTEGER REFERENCES users(id),
+                client_id UUID REFERENCES users(id),
+                freelancer_id UUID REFERENCES users(id),
                 proposal_id INTEGER REFERENCES proposals(id),
                 status VARCHAR(50) DEFAULT 'active',
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
