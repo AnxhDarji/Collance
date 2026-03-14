@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 2%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 30% 6%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 30% 8%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 263 70% 58%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 222 30% 12%;
+    --muted-foreground: 215 20% 55%;
+
+    --accent: 263 70% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 222 20% 14%;
+    --input: 222 20% 14%;
+    --ring: 239 84% 67%;
+
+    --radius: 0.75rem;
+
+    --glow: 263 55% 73%;
+    --success: 142 76% 46%;
+    --warning: 38 92% 50%;
+
+    --sidebar-background: 222 30% 4%;
+    --sidebar-foreground: 210 40% 85%;
+    --sidebar-primary: 239 84% 67%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 30% 10%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 222 20% 12%;
+    --sidebar-ring: 239 84% 67%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(239 84% 67%), hsl(263 70% 58%), hsl(263 55% 73%));
+    --shadow-glow: 0 0 40px -10px hsl(239 84% 67% / 0.4);
+    --shadow-glow-sm: 0 0 20px -5px hsl(239 84% 67% / 0.3);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card/60 backdrop-blur-xl border border-border/50 rounded-xl;
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300 hover:border-primary/30 hover:shadow-[var(--shadow-glow-sm)] hover:-translate-y-1;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  .gradient-border {
+    @apply relative;
+    background: linear-gradient(var(--background), var(--background)) padding-box,
+                var(--gradient-primary) border-box;
+    border: 1px solid transparent;
+  }
+
+  .gradient-btn {
+    background-image: var(--gradient-primary);
+    @apply text-primary-foreground font-medium rounded-lg transition-all duration-300 hover:opacity-90 hover:shadow-[var(--shadow-glow)];
+  }
+
+  .glow-blob {
+    @apply absolute rounded-full blur-3xl opacity-20 pointer-events-none;
+    background-image: var(--gradient-primary);
+  }
+
+  .floating-nav {
+    @apply fixed top-4 left-1/2 -translate-x-1/2 z-50 backdrop-blur-xl bg-card/70 border border-border/50 rounded-2xl px-6 py-3;
+  }
+
+  .kanban-column {
+    @apply glass-card p-4 min-h-[400px] flex-1 min-w-[280px];
+  }
+
+  .status-badge {
+    @apply px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .status-todo {
+    @apply status-badge bg-muted text-muted-foreground;
+  }
+
+  .status-progress {
+    @apply status-badge bg-primary/20 text-primary;
+  }
+
+  .status-completed {
+    @apply status-badge bg-[hsl(var(--success))]/20 text-[hsl(var(--success))];
+  }
+}
+
+@layer utilities {
+  .animate-glow-float {
+    animation: glow-float 8s ease-in-out infinite;
+  }
+
+  .animate-glow-float-delayed {
+    animation: glow-float 8s ease-in-out 4s infinite;
+  }
+}
+
+@keyframes glow-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+@keyframes typing-cursor {
+  0%, 100% { border-color: hsl(var(--primary)); }
+  50% { border-color: transparent; }
+}
