@@ -4,6 +4,9 @@ import NotificationDropdown from "./NotificationDropdown";
 
 const DashboardNavbar = () => {
   const [showNotifs, setShowNotifs] = useState(false);
+  const userStr = localStorage.getItem("user");
+  const user = userStr ? JSON.parse(userStr) : null;
+  const initials = user && user.name ? user.name.substring(0, 2).toUpperCase() : "JD";
 
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-border bg-background/80 backdrop-blur-xl flex items-center justify-between px-6">
@@ -29,7 +32,7 @@ const DashboardNavbar = () => {
         </div>
 
         <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-semibold">
-          JD
+          {initials}
         </div>
       </div>
     </header>

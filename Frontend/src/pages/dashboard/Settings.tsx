@@ -1,6 +1,10 @@
 import { User, Mail, Bell, Shield, Palette } from "lucide-react";
 
-const Settings = () => (
+const Settings = () => {
+  const userStr = localStorage.getItem("user");
+  const user = userStr ? JSON.parse(userStr) : { name: "John Doe", email: "john@example.com" };
+
+  return (
   <div className="space-y-8 max-w-2xl">
     <div>
       <h1 className="font-heading text-2xl font-bold mb-1">Settings</h1>
@@ -16,14 +20,14 @@ const Settings = () => (
         <div>
           <label className="text-sm text-muted-foreground mb-1.5 block">Full Name</label>
           <input
-            defaultValue="John Doe"
+            defaultValue={user.name}
             className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
         </div>
         <div>
           <label className="text-sm text-muted-foreground mb-1.5 block">Email</label>
           <input
-            defaultValue="john@example.com"
+            defaultValue={user.email}
             className="w-full px-4 py-3 rounded-lg bg-muted border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
         </div>
@@ -46,6 +50,7 @@ const Settings = () => (
       ))}
     </div>
   </div>
-);
+  );
+};
 
 export default Settings;
