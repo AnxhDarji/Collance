@@ -73,11 +73,19 @@ const Profile = () => {
       const body: any = {};
       if (isFreelancer) {
         const p = profile as FreelancerProfile;
+        const rateVal = p.hourly_rate !== undefined && p.hourly_rate !== null && String(p.hourly_rate) !== ""
+          ? Number(p.hourly_rate)
+          : null;
+        if (rateVal !== null && isNaN(rateVal)) {
+          alert("Hourly rate must be a valid number");
+          setSaving(false);
+          return;
+        }
         body.bio = p.bio ?? "";
         body.skills = p.skills ?? "";
         body.portfolio = p.portfolio ?? "";
         body.experience = p.experience ?? "";
-        body.hourly_rate = p.hourly_rate ?? null;
+        body.hourly_rate = rateVal;
       } else {
         const p = profile as ClientProfile;
         body.company_name = p.company_name ?? "";

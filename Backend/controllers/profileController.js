@@ -22,7 +22,7 @@ export const getProfile = async (req, res) => {
         LEFT JOIN freelancer_profiles fp ON fp.user_id = u.id
         WHERE u.id = $1
         `,
-        [userId]
+        [userId],
       );
       return res.json(result.rows[0]);
     }
@@ -42,7 +42,7 @@ export const getProfile = async (req, res) => {
         LEFT JOIN client_profiles cp ON cp.user_id = u.id
         WHERE u.id = $1
         `,
-        [userId]
+        [userId],
       );
       return res.json(result.rows[0]);
     }
@@ -60,21 +60,34 @@ export const updateProfile = async (req, res) => {
     const role = req.user.role;
 
     if (role === "freelancer") {
-      const { bio, skills, portfolio, experience, hourly_rate } = req.body;
+      const { bio, skills, portfolio, experience } = req.body;
+      const hourly_rate =
+        req.body.hourly_rate !== "" && req.body.hourly_rate != null
+          ? parseFloat(req.body.hourly_rate)
+          : null;
+
+      if (hourly_rate !== null && isNaN(hourly_rate)) {
+        return res
+          .status(400)
+          .json({ message: "Hourly rate must be a valid number" });
+      }
+
+      const experienceInt = experience && !isNaN(experience) ? Number(experience) : null;
+      const hourlyRateInt = hourly_rate && !isNaN(hourly_rate) ? Number(hourly_rate) : null;
 
       const result = await pool.query(
         `
-        INSERT INTO freelancer_profiles (user_id, bio, skills, portfolio, experience, hourly_rate)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        ON CONFLICT (user_id) DO UPDATE
-          SET bio = EXCLUDED.bio,
-              skills = EXCLUDED.skills,
-              portfolio = EXCLUDED.portfolio,
-              experience = EXCLUDED.experience,
-              hourly_rate = EXCLUDED.hourly_rate
-        RETURNING *
-        `,
-        [userId, bio, skills, portfolio, experience, hourly_rate]
+      INSERT INTO freelancer_profiles (user_id, bio, skills, portfolio, experience, hourly_rate)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      ON CONFLICT (user_id) DO UPDATE
+        SET bio = EXCLUDED.bio,
+            skills = EXCLUDED.skills,
+            portfolio = EXCLUDED.portfolio,
+            experience = EXCLUDED.experience,
+            hourly_rate = EXCLUDED.hourly_rate
+      RETURNING *
+      `,
+        [userId, bio, skills, portfolio, experienceInt, hourlyRateInt],
       );
 
       return res.json(result.rows[0]);
@@ -93,7 +106,7 @@ export const updateProfile = async (req, res) => {
               bio = EXCLUDED.bio
         RETURNING *
         `,
-        [userId, company_name, industry, bio]
+        [userId, company_name, industry, bio],
       );
 
       return res.json(result.rows[0]);
@@ -105,4 +118,3 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-

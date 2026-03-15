@@ -40,4 +40,35 @@ const createUsersTable = async () => {
     }
 };
 
+const createProfileTables = async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS freelancer_profiles (
+        id SERIAL PRIMARY KEY,
+        user_id UUID UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        bio TEXT,
+        skills TEXT,
+        portfolio TEXT,
+        experience TEXT,
+        hourly_rate DECIMAL(10,2),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS client_profiles (
+        id SERIAL PRIMARY KEY,
+        user_id UUID UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        company_name VARCHAR(255),
+        industry VARCHAR(255),
+        bio TEXT,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('Profile tables ready.');
+  } catch (err) {
+    console.error('Error creating profile tables', err);
+  }
+};
+
 createUsersTable();
+createProfileTables();
