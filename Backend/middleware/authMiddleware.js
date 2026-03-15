@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const auth = (req, res, next) => {
+export const verifyToken = (req, res, next) => {
   const authHeader = req.header('Authorization');
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -20,4 +20,4 @@ const auth = (req, res, next) => {
   }
 };
 
-export default auth;
+

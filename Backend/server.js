@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import proposalRoutes from './routes/proposalRoutes.js';
 import contractRoutes from './routes/contractRoutes.js';
+import taskRoutes from "./routes/taskRoutes.js";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/proposals', proposalRoutes);
 app.use('/api/contracts', contractRoutes);
+app.use("/api/tasks", taskRoutes);
 
 // Base route
 app.get('/', (req, res) => {

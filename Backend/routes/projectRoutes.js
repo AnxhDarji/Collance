@@ -1,10 +1,10 @@
 import express from "express";
 import { createProject, getMyProjects } from "../controllers/projectController.js";
-import auth from "../middleware/authMiddleware.js";
+import { verifyToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/create", auth, createProject);
-router.get("/my-projects", auth, getMyProjects);
+router.post("/create", verifyToken, createProject);
+router.get("/my-projects", verifyToken, getMyProjects);
 
 export default router;
