@@ -40,7 +40,6 @@ export const getProjectTasks = async (req, res) => {
   }
 };
 
-
 export const updateTaskStatus = async (req, res) => {
   try {
     const { taskId } = req.params;
@@ -81,17 +80,21 @@ export const updateTaskStatus = async (req, res) => {
   }
 };
 
-
 export const getProjectFreelancers = async (req, res) => {
   try {
     const { projectId } = req.params;
+
     const result = await pool.query(
-      `SELECT u.id, u.name
-       FROM contracts c
-       JOIN users u ON c.freelancer_id = u.id
-       WHERE c.project_id = $1`,
+      `
+      SELECT u.id, u.name
+      FROM project_members pm
+      JOIN users u ON pm.user_id = u.id
+      WHERE pm.project_id = $1
+      ORDER BY u.name ASC
+      `,
       [projectId]
     );
+
     res.json(result.rows);
   } catch (err) {
     console.error("Get Project Freelancers Error:", err);

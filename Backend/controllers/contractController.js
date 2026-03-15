@@ -1,9 +1,7 @@
 import { pool } from "../config/db.js";
 
 export const acceptProposal = async (req, res) => {
-
   try {
-
     const { proposalId } = req.body;
 
     const proposal = await pool.query(
@@ -12,6 +10,10 @@ export const acceptProposal = async (req, res) => {
     );
 
     const data = proposal.rows[0];
+
+    if (!data) {
+      return res.status(404).json({ message: "Proposal not found" });
+    }
 
     await pool.query(
       "UPDATE proposals SET status='accepted' WHERE id=$1",
@@ -24,25 +26,39 @@ export const acceptProposal = async (req, res) => {
       [data.project_id, req.user.id, data.freelancer_id]
     );
 
+    // Ensure the accepted freelancer is a member of the project.
+    // Avoid duplicate entries for the same (project_id, user_id) pair.
+    await pool.query(
+      `INSERT INTO project_members (project_id, user_id)
+       SELECT $1, $2
+       WHERE NOT EXISTS (
+         SELECT 1 FROM project_members
+         WHERE project_id = $1 AND user_id = $2
+       )`,
+      [data.project_id, data.freelancer_id]
+    );
+
     res.json({ message: "Freelancer accepted" });
-
   } catch (err) {
-    res.status(500).json(err);
+    console.error("Accept Proposal Error:", err);
+    res.status(500).json({ message: "Server error" });
   }
-
 };
 
 export const rejectProposal = async (req, res) => {
+  try {
+    const { proposalId } = req.body;
 
-  const { proposalId } = req.body;
+    await pool.query(
+      "UPDATE proposals SET status='rejected' WHERE id=$1",
+      [proposalId]
+    );
 
-  await pool.query(
-    "UPDATE proposals SET status='rejected' WHERE id=$1",
-    [proposalId]
-  );
-
-  res.json({ message: "Proposal rejected" });
-
+    res.json({ message: "Proposal rejected" });
+  } catch (err) {
+    console.error("Reject Proposal Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 export const getMyContracts = async (req, res) => {
@@ -63,6 +79,7 @@ export const getMyContracts = async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json(err);
+    console.error("Get My Contracts Error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };

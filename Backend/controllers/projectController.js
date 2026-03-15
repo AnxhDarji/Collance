@@ -37,3 +37,30 @@ export const getMyProjects = async (req, res) => {
     res.status(500).json(err);
   }
 };
+
+export const getActiveFreelancers = async (req, res) => {
+  try {
+    const clientId = req.user.id;
+
+    const result = await pool.query(
+      `
+      SELECT 
+        p.title AS project_title,
+        p.project_code,
+        u.name AS freelancer_name,
+        pm.joined_at
+      FROM project_members pm
+      JOIN projects p ON pm.project_id = p.id
+      JOIN users u ON pm.user_id = u.id
+      WHERE p.client_id = $1
+      ORDER BY pm.joined_at DESC
+      `,
+      [clientId]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Get Active Freelancers Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

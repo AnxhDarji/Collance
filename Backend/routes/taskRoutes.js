@@ -18,7 +18,13 @@ router.get("/project/:projectId", verifyToken, getProjectTasks);
 
 router.patch("/update/:taskId", verifyToken, allowFreelancer, updateTaskStatus);
 
-router.get("/freelancers/:projectId", verifyToken, allowClient, getProjectFreelancers);
+// For assigning tasks: list freelancers on a given project
+router.get(
+  "/project-freelancers/:projectId",
+  verifyToken,
+  allowClient,
+  getProjectFreelancers
+);
 
 router.get("/mytasks", verifyToken, getMyTasks);
 

@@ -9,6 +9,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  User,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -18,6 +19,7 @@ const navItems = [
   { label: "Tasks", icon: CheckSquare, to: "/dashboard/tasks" },
   { label: "Notifications", icon: Bell, to: "/dashboard/notifications" },
   { label: "Analytics", icon: BarChart3, to: "/dashboard/analytics" },
+  { label: "Profile", icon: User, to: "/dashboard/profile" },
   { label: "Settings", icon: Settings, to: "/dashboard/settings" },
 ];
 
@@ -67,13 +69,17 @@ const DashboardSidebar = () => {
       </nav>
 
       <div className="p-2 border-t border-border">
-        <Link
-          to="/"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-sidebar-accent transition-colors"
+        <button
+          onClick={() => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "/signin";
+          }}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-sidebar-accent transition-colors text-left"
         >
           <LogOut size={20} className="shrink-0" />
           {!collapsed && <span>Sign Out</span>}
-        </Link>
+        </button>
       </div>
     </aside>
   );

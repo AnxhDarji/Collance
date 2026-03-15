@@ -95,7 +95,7 @@ const Tasks = () => {
   const fetchFreelancers = async (projectId: number) => {
     setLoadingFreelancers(true);
     try {
-      const res = await fetch(`${API}/api/tasks/freelancers/${projectId}`, { headers });
+      const res = await fetch(`${API}/api/tasks/project-freelancers/${projectId}`, { headers });
       if (res.ok) setFreelancers(await res.json());
     } finally {
       setLoadingFreelancers(false);
