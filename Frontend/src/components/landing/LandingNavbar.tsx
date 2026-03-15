@@ -25,8 +25,9 @@ const LandingNavbar = () => {
       }`}
     >
       <div className="flex items-center justify-between">
-        <Link to="/" className="font-heading text-xl font-bold gradient-text">
-          Collance
+        <Link to="/" className="flex items-center gap-2">
+          <img src="/Collance_Logo.jpeg" alt="Collance Logo" className="h-8 w-8 object-contain" />
+          <span className="font-heading text-xl font-bold gradient-text">Collance</span>
         </Link>
 
         {/* Desktop */}

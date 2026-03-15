@@ -35,8 +35,9 @@ const DashboardSidebar = () => {
     >
       <div className="flex items-center justify-between p-4 border-b border-border">
         {!collapsed && (
-          <Link to="/" className="font-heading text-lg font-bold gradient-text">
-            Collance
+          <Link to="/" className="flex items-center gap-2">
+            <img src="/Collance_Logo.jpeg" alt="Collance Logo" className="h-7 w-7 object-contain" />
+            <span className="font-heading text-lg font-bold gradient-text">Collance</span>
           </Link>
         )}
         <button
