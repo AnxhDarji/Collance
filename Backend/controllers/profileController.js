@@ -1,9 +1,52 @@
 import { pool } from "../config/db.js";
 
+const getUserWithRole = async (userId) => {
+  const result = await pool.query(
+    `SELECT id, name, email, role
+     FROM users
+     WHERE id = $1`,
+    [userId],
+  );
+
+  return result.rows[0] ?? null;
+};
+
+const ensureProfileExists = async (userId, role) => {
+  if (role === "freelancer") {
+    await pool.query(
+      `INSERT INTO freelancer_profiles (user_id)
+       VALUES ($1)
+       ON CONFLICT (user_id) DO NOTHING`,
+      [userId],
+    );
+  }
+
+  if (role === "client") {
+    await pool.query(
+      `INSERT INTO client_profiles (user_id)
+       VALUES ($1)
+       ON CONFLICT (user_id) DO NOTHING`,
+      [userId],
+    );
+  }
+};
+
 export const getProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const role = req.user.role;
+    const user = await getUserWithRole(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const role = user.role;
+
+    if (!["freelancer", "client"].includes(role)) {
+      return res.status(400).json({ message: "Unsupported role for profile" });
+    }
+
+    await ensureProfileExists(userId, role);
 
     if (role === "freelancer") {
       const result = await pool.query(
@@ -24,7 +67,7 @@ export const getProfile = async (req, res) => {
         `,
         [userId],
       );
-      return res.json(result.rows[0]);
+      return res.json(result.rows[0] ?? user);
     }
 
     if (role === "client") {
@@ -44,7 +87,7 @@ export const getProfile = async (req, res) => {
         `,
         [userId],
       );
-      return res.json(result.rows[0]);
+      return res.json(result.rows[0] ?? user);
     }
 
     res.status(400).json({ message: "Unsupported role for profile" });
@@ -57,7 +100,19 @@ export const getProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const role = req.user.role;
+    const user = await getUserWithRole(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const role = user.role;
+
+    if (!["freelancer", "client"].includes(role)) {
+      return res.status(400).json({ message: "Unsupported role for profile" });
+    }
+
+    await ensureProfileExists(userId, role);
 
     if (role === "freelancer") {
       const { bio, skills, portfolio, experience } = req.body;

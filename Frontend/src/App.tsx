@@ -15,6 +15,7 @@ import Analytics from "./pages/dashboard/Analytics.tsx";
 import Settings from "./pages/dashboard/Settings.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Profile from "./pages/dashboard/Profile.tsx";
+import SelectRole from "./pages/SelectRole.tsx";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -33,6 +34,19 @@ const RequireAuth = ({ children }: { children: JSX.Element }) => {
   return children;
 };
 
+const RequireNoRole = ({ children }: { children: JSX.Element }) => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) { navigate("/signin"); return; }
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    if (user.role) navigate("/dashboard");
+  }, [navigate]);
+
+  return children;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -43,6 +57,14 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route
+            path="/select-role"
+            element={
+              <RequireNoRole>
+                <SelectRole />
+              </RequireNoRole>
+            }
+          />
           <Route
             path="/dashboard"
             element={

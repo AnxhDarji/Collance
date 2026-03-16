@@ -22,15 +22,18 @@ export const createTask = async (req, res) => {
 export const getProjectTasks = async (req, res) => {
   try {
     const { projectId } = req.params;
+    const userId = req.user.id;
 
     const result = await pool.query(
       `SELECT t.*, u1.name AS client_name, u2.name AS freelancer_name
        FROM tasks t
+       JOIN projects p ON t.project_id = p.id
        JOIN users u1 ON t.assigned_by = u1.id
        JOIN users u2 ON t.assigned_to = u2.id
        WHERE t.project_id = $1
+         AND (p.client_id = $2 OR t.assigned_by = $2)
        ORDER BY t.created_at DESC`,
-      [projectId]
+      [projectId, userId]
     );
 
     res.json(result.rows);

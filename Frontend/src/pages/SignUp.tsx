@@ -1,20 +1,56 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Mail, Lock, User, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { GoogleLogin } from "@react-oauth/google";
 
 const SignUp = () => {
   const [role, setRole] = useState("freelancer");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
+    try {
+      if (!credentialResponse.credential) {
+        throw new Error("Google did not return a credential token");
+      }
+      const response = await fetch("http://localhost:5000/api/auth/google-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: credentialResponse.credential }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Google sign up failed");
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      toast.success(`Welcome, ${data.user.name}!`);
+      navigate(data.user.role ? "/dashboard" : "/select-role");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Google sign up failed");
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const prefill = params.get("email");
+    if (prefill && !email) setEmail(prefill);
+  }, [location.search, email]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -38,8 +74,8 @@ const SignUp = () => {
 
       toast.success(`You've logged in as ${data.user.name}`);
       navigate("/dashboard");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to sign up");
     } finally {
       setLoading(false);
     }
@@ -124,10 +160,38 @@ const SignUp = () => {
                 />
               </div>
             </div>
+            <div>
+              <label className="text-sm text-muted-foreground mb-1.5 block">Confirm Password</label>
+              <div className="relative">
+                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+            </div>
             <button type="submit" disabled={loading} className="w-full gradient-btn py-3 rounded-lg flex items-center justify-center gap-2 font-semibold disabled:opacity-50">
               {loading ? "Creating Account..." : "Create Account"} <ArrowRight size={18} />
             </button>
           </form>
+
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground">OR</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError("Google authentication failed")}
+              width={368}
+            />
+          </div>
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-6">

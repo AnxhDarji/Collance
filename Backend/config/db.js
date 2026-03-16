@@ -28,12 +28,20 @@ const createUsersTable = async () => {
         name VARCHAR(100) NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        role VARCHAR(50) NOT NULL,
+        role VARCHAR(50),
+        provider VARCHAR(20) NOT NULL DEFAULT 'local',
+        google_id VARCHAR(255),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `;
     try {
       await pool.query(createTableQuery);
+
+      // Lightweight "migration" for existing DBs created with older schema.
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS provider VARCHAR(20) NOT NULL DEFAULT 'local';`);
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id VARCHAR(255);`);
+      await pool.query(`ALTER TABLE users ALTER COLUMN role DROP NOT NULL;`);
+
       console.log('Users table ready.');
     } catch (err) {
       console.error('Error creating users table', err);

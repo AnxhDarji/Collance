@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const words = ["Projects", "Freelancers", "Team", "Workflow"];
 
@@ -7,6 +8,8 @@ const HeroSection = () => {
   const [wordIndex, setWordIndex] = useState(0);
   const [displayed, setDisplayed] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [email, setEmail] = useState("");
+  const navigate = useNavigate();
 
   const currentWord = words[wordIndex];
 
@@ -73,14 +76,25 @@ const HeroSection = () => {
           className="flex flex-col sm:flex-row items-center gap-3 justify-center animate-fade-in-up"
           style={{ animationDelay: "0.5s" }}
         >
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="w-full sm:w-80 px-5 py-3 rounded-xl bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-          />
-          <button className="gradient-btn px-6 py-3 rounded-xl flex items-center gap-2 font-semibold whitespace-nowrap">
-            Start Free <ArrowRight size={18} />
-          </button>
+          <form
+            className="flex flex-col sm:flex-row items-center gap-3 justify-center w-full"
+            onSubmit={(e) => {
+              e.preventDefault();
+              navigate(`/signup?email=${encodeURIComponent(email)}`);
+            }}
+          >
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              className="w-full sm:w-80 px-5 py-3 rounded-xl bg-muted border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+            />
+            <button type="submit" className="gradient-btn px-6 py-3 rounded-xl flex items-center gap-2 font-semibold whitespace-nowrap">
+              Start Free <ArrowRight size={18} />
+            </button>
+          </form>
         </div>
       </div>
     </section>

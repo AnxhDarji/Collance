@@ -71,10 +71,6 @@ const Tasks = () => {
   useEffect(() => {
     if (isClient) {
       fetchProjects();
-      if (selectedProject) {
-        fetchTasks(selectedProject.id);
-        fetchFreelancers(selectedProject.id);
-      }
     } else {
       fetchMyTasks();
     }
@@ -84,7 +80,38 @@ const Tasks = () => {
 
   const fetchProjects = async () => {
     const res = await fetch(`${API}/api/projects/my-projects`, { headers });
-    if (res.ok) setProjects(await res.json());
+    if (!res.ok) return;
+
+    const clientProjects: Project[] = await res.json();
+    setProjects(clientProjects);
+
+    if (clientProjects.length === 0) {
+      setSelectedProject(null);
+      setFreelancers([]);
+      setSelectedFreelancer("");
+      setTaskName("");
+      setTasks([]);
+      localStorage.removeItem("selectedProject");
+      return;
+    }
+
+    const savedProjectId = selectedProject?.id;
+    const validProject = clientProjects.find((project) => project.id === savedProjectId) ?? null;
+
+    if (!validProject) {
+      setSelectedProject(null);
+      setFreelancers([]);
+      setSelectedFreelancer("");
+      setTaskName("");
+      setTasks([]);
+      localStorage.removeItem("selectedProject");
+      return;
+    }
+
+    setSelectedProject(validProject);
+    localStorage.setItem("selectedProject", JSON.stringify(validProject));
+    fetchTasks(validProject.id);
+    fetchFreelancers(validProject.id);
   };
 
   const fetchMyTasks = async () => {
@@ -202,48 +229,49 @@ const Tasks = () => {
             ))}
           </select>
 
-          {selectedProject && (
-            <form onSubmit={handleAssignTask} className="flex flex-col gap-3">
-              {loadingFreelancers ? (
-                <p className="text-xs text-muted-foreground">Loading freelancers...</p>
-              ) : freelancers.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No freelancers on this project yet.</p>
-              ) : (
-                <select
-                  required
-                  value={selectedFreelancer}
-                  onChange={(e) => setSelectedFreelancer(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                >
-                  <option value="">Select a freelancer</option>
-                  {freelancers.map((f) => (
-                    <option key={f.id} value={f.id}>{f.name}</option>
-                  ))}
-                </select>
-              )}
+          <form onSubmit={handleAssignTask} className="flex flex-col gap-3">
+            {loadingFreelancers ? (
+              <p className="text-xs text-muted-foreground">Loading freelancers...</p>
+            ) : selectedProject && freelancers.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No freelancers on this project yet.</p>
+            ) : null}
 
-              {selectedFreelancer && (
-                <input
-                  type="text"
-                  required
-                  value={taskName}
-                  onChange={(e) => setTaskName(e.target.value)}
-                  placeholder="Task name"
-                  className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                />
-              )}
+            <select
+              required
+              disabled={!selectedProject || freelancers.length === 0}
+              value={selectedFreelancer}
+              onChange={(e) => setSelectedFreelancer(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <option value="">
+                {selectedProject ? "Select a freelancer" : "Select a project first"}
+              </option>
+              {freelancers.map((f) => (
+                <option key={f.id} value={f.id}>{f.name}</option>
+              ))}
+            </select>
 
-              {selectedFreelancer && taskName && (
-                <button
-                  type="submit"
-                  disabled={assigning}
-                  className="gradient-btn w-full py-2.5 rounded-lg text-sm font-medium disabled:opacity-50"
-                >
-                  {assigning ? "Assigning..." : "Assign Task"}
-                </button>
-              )}
-            </form>
-          )}
+            {selectedFreelancer && (
+              <input
+                type="text"
+                required
+                value={taskName}
+                onChange={(e) => setTaskName(e.target.value)}
+                placeholder="Task name"
+                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            )}
+
+            {selectedFreelancer && taskName && (
+              <button
+                type="submit"
+                disabled={assigning}
+                className="gradient-btn w-full py-2.5 rounded-lg text-sm font-medium disabled:opacity-50"
+              >
+                {assigning ? "Assigning..." : "Assign Task"}
+              </button>
+            )}
+          </form>
         </div>
       )}
 

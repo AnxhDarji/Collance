@@ -2,11 +2,13 @@ import { Bell, Search, User, Settings, LogOut } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NotificationDropdown from "./NotificationDropdown";
+import { useNotifications } from "@/contexts/NotificationsContext";
 
 const DashboardNavbar = () => {
   const [showNotifs, setShowNotifs] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const navigate = useNavigate();
+  const { unreadCount } = useNotifications();
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
   const initials = user && user.name ? user.name.substring(0, 2).toUpperCase() : "JD";
@@ -14,6 +16,10 @@ const DashboardNavbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const key = sessionStorage.key(i);
+      if (key?.startsWith("collance.notifications.session.v1:")) sessionStorage.removeItem(key);
+    }
     navigate("/signin");
   };
 
@@ -35,7 +41,7 @@ const DashboardNavbar = () => {
             className="relative p-2 rounded-lg hover:bg-muted transition-colors"
           >
             <Bell size={20} className="text-muted-foreground" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
+            {unreadCount > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />}
           </button>
           {showNotifs && <NotificationDropdown onClose={() => setShowNotifs(false)} />}
         </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { GoogleLogin } from "@react-oauth/google";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -10,6 +11,27 @@ const SignIn = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
+    try {
+      if (!credentialResponse.credential) {
+        throw new Error("Google did not return a credential token");
+      }
+      const response = await fetch("http://localhost:5000/api/auth/google-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: credentialResponse.credential }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Google login failed");
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      toast.success(`Welcome, ${data.user.name}!`);
+      navigate(data.user.role ? "/dashboard" : "/select-role");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Google login failed");
+    }
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,8 +59,8 @@ const SignIn = () => {
 
       toast.success(`You've logged in as ${data.user.name}`);
       navigate("/dashboard");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to sign in");
     } finally {
       setLoading(false);
     }
@@ -113,6 +135,20 @@ const SignIn = () => {
               {loading ? "Signing in..." : "Sign In"} <ArrowRight size={18} />
             </button>
           </form>
+
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground">OR</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError("Google authentication failed")}
+              width={368}
+            />
+          </div>
         </div>
 
         <p className="text-center text-sm text-muted-foreground mt-6">

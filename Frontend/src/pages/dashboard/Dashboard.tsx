@@ -1,12 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Briefcase, Users, UserPlus, CheckSquare, TrendingUp, ArrowUpRight } from "lucide-react";
 
-const stats = [
-  { label: "Total Projects", value: "12", icon: Briefcase, change: "+2 this month" },
-  { label: "Active Freelancers", value: "34", icon: Users, change: "+5 this week" },
-  { label: "Pending Requests", value: "7", icon: UserPlus, change: "3 new today" },
-  { label: "Completed Tasks", value: "128", icon: CheckSquare, change: "+18 this week" },
-];
+type BackendStatus = "not_started" | "in_progress" | "completed";
 
 interface Contract {
   id: string;
@@ -18,30 +13,135 @@ interface Contract {
   created_at: string;
 }
 
+interface Project {
+  id: number;
+  title: string;
+  project_code: string;
+}
+
+interface Proposal {
+  id: string;
+}
+
+interface Task {
+  id: string;
+  status: BackendStatus;
+}
+
+const API = "http://localhost:5000";
+
 const Dashboard = () => {
   const [contracts, setContracts] = useState<Contract[]>([]);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [counts, setCounts] = useState({
+    totalProjects: 0,
+    activeFreelancers: 0,
+    pendingRequests: 0,
+    completedTasks: 0,
+  });
   
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : { name: "John" };
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    fetchContracts();
-  }, []);
+    let cancelled = false;
 
-  const fetchContracts = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/contracts/my-contracts", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setContracts(data);
+    const load = async () => {
+      if (!token) {
+        setCounts({ totalProjects: 0, activeFreelancers: 0, pendingRequests: 0, completedTasks: 0 });
+        setLoadingStats(false);
+        return;
       }
-    } catch (error) {
-      console.error("Failed to fetch contracts", error);
-    }
-  };
+
+      setLoadingStats(true);
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+
+        if (user?.role === "client") {
+          const [projectsRes, contractsRes, proposalsRes] = await Promise.all([
+            fetch(`${API}/api/projects/my-projects`, { headers }),
+            fetch(`${API}/api/contracts/my-contracts`, { headers }),
+            fetch(`${API}/api/proposals/incoming`, { headers }),
+          ]);
+
+          const projects = projectsRes.ok ? ((await projectsRes.json()) as Project[]) : [];
+          const contractsData = contractsRes.ok ? ((await contractsRes.json()) as Contract[]) : [];
+          const proposals = proposalsRes.ok ? ((await proposalsRes.json()) as Proposal[]) : [];
+
+          const taskFetches = Array.isArray(projects)
+            ? projects.map((p) => fetch(`${API}/api/tasks/project/${p.id}`, { headers }))
+            : [];
+          const taskResponses = await Promise.all(taskFetches);
+
+          let completedTasks = 0;
+          for (const r of taskResponses) {
+            if (!r.ok) continue;
+            const data = (await r.json()) as Task[];
+            if (!Array.isArray(data)) continue;
+            completedTasks += data.filter((t) => t.status === "completed").length;
+          }
+
+          const activeFreelancers = new Set(
+            Array.isArray(contractsData) ? contractsData.map((c) => c.freelancer_name).filter(Boolean) : [],
+          ).size;
+
+          if (cancelled) return;
+          setContracts(Array.isArray(contractsData) ? contractsData : []);
+          setCounts({
+            totalProjects: Array.isArray(projects) ? projects.length : 0,
+            activeFreelancers,
+            pendingRequests: Array.isArray(proposals) ? proposals.length : 0,
+            completedTasks,
+          });
+          return;
+        }
+
+        // Freelancer / fallback: keep dashboard stable with best-effort counts.
+        const [contractsRes, tasksRes] = await Promise.all([
+          fetch(`${API}/api/contracts/my-contracts`, { headers }),
+          fetch(`${API}/api/tasks/mytasks`, { headers }),
+        ]);
+
+        const contractsData = contractsRes.ok ? ((await contractsRes.json()) as Contract[]) : [];
+        const tasks = tasksRes.ok ? ((await tasksRes.json()) as Task[]) : [];
+
+        const totalProjects = new Set(
+          Array.isArray(contractsData) ? contractsData.map((c) => c.project_code).filter(Boolean) : [],
+        ).size;
+        const completedTasks = Array.isArray(tasks) ? tasks.filter((t) => t.status === "completed").length : 0;
+
+        if (cancelled) return;
+        setContracts(Array.isArray(contractsData) ? contractsData : []);
+        setCounts({
+          totalProjects,
+          activeFreelancers: 0,
+          pendingRequests: 0,
+          completedTasks,
+        });
+      } catch {
+        if (cancelled) return;
+        setCounts({ totalProjects: 0, activeFreelancers: 0, pendingRequests: 0, completedTasks: 0 });
+      } finally {
+        if (!cancelled) setLoadingStats(false);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, user?.role]);
+
+  const stats = useMemo(
+    () => [
+      { label: "Total Projects", value: String(counts.totalProjects), icon: Briefcase, change: "+2 this month" },
+      { label: "Active Freelancers", value: String(counts.activeFreelancers), icon: Users, change: "+5 this week" },
+      { label: "Pending Requests", value: String(counts.pendingRequests), icon: UserPlus, change: "3 new today" },
+      { label: "Completed Tasks", value: String(counts.completedTasks), icon: CheckSquare, change: "+18 this week" },
+    ],
+    [counts],
+  );
 
   return (
     <div className="space-y-8">
@@ -60,7 +160,13 @@ const Dashboard = () => {
               </div>
               <ArrowUpRight size={16} className="text-success" />
             </div>
-            <p className="font-heading text-2xl font-bold">{s.value}</p>
+            <p className="font-heading text-2xl font-bold">
+              {loadingStats ? (
+                <span className="inline-block h-7 w-12 rounded bg-muted animate-pulse align-middle" />
+              ) : (
+                s.value
+              )}
+            </p>
             <p className="text-sm text-muted-foreground">{s.label}</p>
             <p className="text-xs text-success mt-1 flex items-center gap-1">
               <TrendingUp size={12} /> {s.change}

@@ -8,13 +8,21 @@ import proposalRoutes from './routes/proposalRoutes.js';
 import contractRoutes from './routes/contractRoutes.js';
 import taskRoutes from "./routes/taskRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:8080", "http://localhost:8081", "http://localhost:5173"],
+  credentials: true,
+}));
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  next();
+});
 app.use(express.json());
 
 // Routes
@@ -24,6 +32,7 @@ app.use('/api/proposals', proposalRoutes);
 app.use('/api/contracts', contractRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/user", userRoutes);
 
 // Base route
 app.get('/', (req, res) => {

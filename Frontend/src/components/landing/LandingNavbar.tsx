@@ -5,7 +5,7 @@ import { Menu, X } from "lucide-react";
 const navLinks = [
   { label: "Features", href: "#features" },
   { label: "Product", href: "#product" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Workflow", href: "#workflow" },
 ];
 
 const LandingNavbar = () => {
@@ -17,6 +17,15 @@ const LandingNavbar = () => {
     window.addEventListener("scroll", handler);
     return () => window.removeEventListener("scroll", handler);
   }, []);
+
+  const handleAnchorClick = (href: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!href.startsWith("#")) return;
+    e.preventDefault();
+    const id = href.slice(1);
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    else window.location.hash = href;
+  };
 
   return (
     <nav
@@ -37,6 +46,7 @@ const LandingNavbar = () => {
               key={l.label}
               href={l.href}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              onClick={handleAnchorClick(l.href)}
             >
               {l.label}
             </a>
@@ -68,7 +78,10 @@ const LandingNavbar = () => {
               key={l.label}
               href={l.href}
               className="text-sm text-muted-foreground hover:text-foreground"
-              onClick={() => setMobileOpen(false)}
+              onClick={(e) => {
+                setMobileOpen(false);
+                handleAnchorClick(l.href)(e);
+              }}
             >
               {l.label}
             </a>
