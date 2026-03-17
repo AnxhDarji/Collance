@@ -6,9 +6,7 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "localhost",
-    // Use Vite's default dev port to avoid OS-level port reservations on 8080.
-    // (Google OAuth already allows http://localhost:5173)
+    host: true,
     port: 5173,
     strictPort: false,
     hmr: {

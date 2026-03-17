@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { User, Mail, Briefcase, Globe2, FileText, DollarSign } from "lucide-react";
-
-const API = "http://localhost:5000";
+import { buildApiUrl } from "@/lib/api";
 
 type Role = "client" | "freelancer";
 
@@ -44,7 +43,7 @@ const Profile = () => {
     const fetchProfile = async () => {
       if (!token) return;
       try {
-        const res = await fetch(`${API}/api/profile`, {
+        const res = await fetch(buildApiUrl("/api/profile"), {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -93,7 +92,7 @@ const Profile = () => {
         body.bio = p.bio ?? "";
       }
 
-      const res = await fetch(`${API}/api/profile/update`, {
+      const res = await fetch(buildApiUrl("/api/profile/update"), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -276,4 +275,3 @@ const Profile = () => {
 };
 
 export default Profile;
-

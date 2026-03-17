@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Copy, Users, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { buildApiUrl } from "@/lib/api";
 
 interface Project {
   id: string;
@@ -37,7 +38,7 @@ const Projects = () => {
 
   const fetchProjects = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/projects/my-projects", {
+      const res = await fetch(buildApiUrl("/api/projects/my-projects"), {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -53,7 +54,7 @@ const Projects = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/projects/create", {
+      const res = await fetch(buildApiUrl("/api/projects/create"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,7 +91,7 @@ const Projects = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/proposals/request", {
+      const res = await fetch(buildApiUrl("/api/proposals/request"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -12,6 +12,10 @@ export const verifyToken = (req, res, next) => {
   const token = authHeader.split(' ')[1];
 
   try {
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ message: 'Server misconfiguration' });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
@@ -19,5 +23,4 @@ export const verifyToken = (req, res, next) => {
     res.status(401).json({ message: 'Token is not valid' });
   }
 };
-
 

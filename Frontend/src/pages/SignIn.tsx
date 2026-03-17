@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { GoogleLogin } from "@react-oauth/google";
+import { buildApiUrl } from "@/lib/api";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -17,7 +18,7 @@ const SignIn = () => {
       if (!credentialResponse.credential) {
         throw new Error("Google did not return a credential token");
       }
-      const response = await fetch("http://localhost:5000/api/auth/google-login", {
+      const response = await fetch(buildApiUrl("/api/auth/google-login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: credentialResponse.credential }),
@@ -39,7 +40,7 @@ const SignIn = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/signin", {
+      const response = await fetch(buildApiUrl("/api/auth/signin"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

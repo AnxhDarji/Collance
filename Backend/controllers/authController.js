@@ -3,6 +3,14 @@ import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import { pool } from "../config/db.js";
 
+const getJwtSecret = () => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is not set");
+  }
+
+  return process.env.JWT_SECRET;
+};
+
 export const googleLogin = async (req, res) => {
   try {
     const { token } = req.body;
@@ -13,11 +21,6 @@ export const googleLogin = async (req, res) => {
       console.error("GOOGLE_CLIENT_ID is not set");
       return res.status(500).json({ message: "Server misconfiguration" });
     }
-    if (!process.env.JWT_SECRET) {
-      console.error("JWT_SECRET is not set");
-      return res.status(500).json({ message: "Server misconfiguration" });
-    }
-
     const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
@@ -59,7 +62,7 @@ export const googleLogin = async (req, res) => {
 
     const jwtToken = jwt.sign(
       { id: user.id, name: user.name, role: user.role },
-      process.env.JWT_SECRET,
+      getJwtSecret(),
       { expiresIn: "30d" }
     );
 
@@ -107,7 +110,7 @@ export const signup = async (req, res) => {
     // Create JWT
     const token = jwt.sign(
       { id: user.id, name: user.name, role: user.role },
-      process.env.JWT_SECRET,
+      getJwtSecret(),
       {
         expiresIn: "30d",
       }
@@ -158,7 +161,7 @@ export const signin = async (req, res) => {
     // Create JWT
     const token = jwt.sign(
       { id: user.id, name: user.name, role: user.role },
-      process.env.JWT_SECRET,
+      getJwtSecret(),
       {
         expiresIn: "30d",
       }

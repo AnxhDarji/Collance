@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Mail, Lock, User, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { GoogleLogin } from "@react-oauth/google";
+import { buildApiUrl } from "@/lib/api";
 
 const SignUp = () => {
   const [role, setRole] = useState("freelancer");
@@ -20,7 +21,7 @@ const SignUp = () => {
       if (!credentialResponse.credential) {
         throw new Error("Google did not return a credential token");
       }
-      const response = await fetch("http://localhost:5000/api/auth/google-login", {
+      const response = await fetch(buildApiUrl("/api/auth/google-login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: credentialResponse.credential }),
@@ -54,7 +55,7 @@ const SignUp = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/signup", {
+      const response = await fetch(buildApiUrl("/api/auth/signup"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

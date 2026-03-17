@@ -13,12 +13,25 @@ import userRoutes from "./routes/userRoutes.js";
 dotenv.config();
 
 const app = express();
+const allowedOrigins = (process.env.FRONTEND_URL || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error("CORS origin not allowed"));
+  },
+  credentials: true,
+};
 
 // Middleware
-app.use(cors({
-  origin: ["http://localhost:8080", "http://localhost:8081", "http://localhost:5173"],
-  credentials: true,
-}));
+app.use(cors(corsOptions));
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   next();

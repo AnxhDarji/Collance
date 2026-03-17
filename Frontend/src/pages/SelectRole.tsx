@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Briefcase, Code2 } from "lucide-react";
+import { buildApiUrl } from "@/lib/api";
 
 const SelectRole = () => {
   const [loading, setLoading] = useState(false);
@@ -11,7 +12,7 @@ const SelectRole = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/user/set-role", {
+      const response = await fetch(buildApiUrl("/api/user/set-role"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

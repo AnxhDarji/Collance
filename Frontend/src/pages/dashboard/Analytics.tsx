@@ -1,5 +1,6 @@
 import { BarChart3, CheckSquare, Clock, TrendingUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { buildApiUrl } from "@/lib/api";
 
 type BackendStatus = "not_started" | "in_progress" | "completed";
 
@@ -27,8 +28,6 @@ interface Task {
   status: BackendStatus;
   created_at: string;
 }
-
-const API = "http://localhost:5000";
 
 const Analytics = () => {
   const userStr = localStorage.getItem("user");
@@ -58,15 +57,15 @@ const Analytics = () => {
       try {
         if (user?.role === "client") {
           const [projectsRes, contractsRes] = await Promise.all([
-            fetch(`${API}/api/projects/my-projects`, { headers }),
-            fetch(`${API}/api/contracts/my-contracts`, { headers }),
+            fetch(buildApiUrl("/api/projects/my-projects"), { headers }),
+            fetch(buildApiUrl("/api/contracts/my-contracts"), { headers }),
           ]);
 
           const nextProjects = projectsRes.ok ? ((await projectsRes.json()) as Project[]) : [];
           const nextContracts = contractsRes.ok ? ((await contractsRes.json()) as Contract[]) : [];
 
           const taskFetches = Array.isArray(nextProjects)
-            ? nextProjects.map((p) => fetch(`${API}/api/tasks/project/${p.id}`, { headers }))
+            ? nextProjects.map((p) => fetch(buildApiUrl(`/api/tasks/project/${p.id}`), { headers }))
             : [];
           const taskResponses = await Promise.all(taskFetches);
 
@@ -83,8 +82,8 @@ const Analytics = () => {
           setTasks(allTasks);
         } else {
           const [tasksRes, contractsRes] = await Promise.all([
-            fetch(`${API}/api/tasks/mytasks`, { headers }),
-            fetch(`${API}/api/contracts/my-contracts`, { headers }),
+            fetch(buildApiUrl("/api/tasks/mytasks"), { headers }),
+            fetch(buildApiUrl("/api/contracts/my-contracts"), { headers }),
           ]);
 
           const nextTasks = tasksRes.ok ? ((await tasksRes.json()) as Task[]) : [];

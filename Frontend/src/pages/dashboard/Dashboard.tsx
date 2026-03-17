@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Briefcase, Users, UserPlus, CheckSquare, TrendingUp, ArrowUpRight } from "lucide-react";
+import { buildApiUrl } from "@/lib/api";
 
 type BackendStatus = "not_started" | "in_progress" | "completed";
 
@@ -27,8 +28,6 @@ interface Task {
   id: string;
   status: BackendStatus;
 }
-
-const API = "http://localhost:5000";
 
 const Dashboard = () => {
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -60,9 +59,9 @@ const Dashboard = () => {
 
         if (user?.role === "client") {
           const [projectsRes, contractsRes, proposalsRes] = await Promise.all([
-            fetch(`${API}/api/projects/my-projects`, { headers }),
-            fetch(`${API}/api/contracts/my-contracts`, { headers }),
-            fetch(`${API}/api/proposals/incoming`, { headers }),
+            fetch(buildApiUrl("/api/projects/my-projects"), { headers }),
+            fetch(buildApiUrl("/api/contracts/my-contracts"), { headers }),
+            fetch(buildApiUrl("/api/proposals/incoming"), { headers }),
           ]);
 
           const projects = projectsRes.ok ? ((await projectsRes.json()) as Project[]) : [];
@@ -70,7 +69,7 @@ const Dashboard = () => {
           const proposals = proposalsRes.ok ? ((await proposalsRes.json()) as Proposal[]) : [];
 
           const taskFetches = Array.isArray(projects)
-            ? projects.map((p) => fetch(`${API}/api/tasks/project/${p.id}`, { headers }))
+            ? projects.map((p) => fetch(buildApiUrl(`/api/tasks/project/${p.id}`), { headers }))
             : [];
           const taskResponses = await Promise.all(taskFetches);
 
@@ -99,8 +98,8 @@ const Dashboard = () => {
 
         // Freelancer / fallback: keep dashboard stable with best-effort counts.
         const [contractsRes, tasksRes] = await Promise.all([
-          fetch(`${API}/api/contracts/my-contracts`, { headers }),
-          fetch(`${API}/api/tasks/mytasks`, { headers }),
+          fetch(buildApiUrl("/api/contracts/my-contracts"), { headers }),
+          fetch(buildApiUrl("/api/tasks/mytasks"), { headers }),
         ]);
 
         const contractsData = contractsRes.ok ? ((await contractsRes.json()) as Contract[]) : [];

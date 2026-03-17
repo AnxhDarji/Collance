@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { buildApiUrl } from "@/lib/api";
 
 type NotificationIcon = "users" | "check" | "activity" | "message";
 type ProposalStatus = "pending" | "accepted" | "rejected";
@@ -55,7 +56,6 @@ interface NotificationsContextValue {
 
 const NotificationsContext = createContext<NotificationsContextValue | null>(null);
 
-const API = "http://localhost:5000";
 const PREFS_KEY = "collance.notificationPrefs.v1";
 
 const getUserKey = () => {
@@ -226,7 +226,7 @@ export const NotificationsProvider = ({ children }: { children: React.ReactNode 
     }
 
     try {
-      const res = await fetch(`${API}/api/proposals/incoming`, {
+      const res = await fetch(buildApiUrl("/api/proposals/incoming"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
@@ -243,7 +243,7 @@ export const NotificationsProvider = ({ children }: { children: React.ReactNode 
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const res = await fetch(`${API}/api/contracts/${action}`, {
+      const res = await fetch(buildApiUrl(`/api/contracts/${action}`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

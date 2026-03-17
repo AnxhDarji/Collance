@@ -1,6 +1,14 @@
 import { pool } from "../config/db.js";
 import jwt from "jsonwebtoken";
 
+const getJwtSecret = () => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is not set");
+  }
+
+  return process.env.JWT_SECRET;
+};
+
 export const setRole = async (req, res) => {
   const { role } = req.body;
   if (!["client", "freelancer"].includes(role)) {
@@ -15,7 +23,7 @@ export const setRole = async (req, res) => {
     const user = result.rows[0];
     const token = jwt.sign(
       { id: user.id, name: user.name, role: user.role },
-      process.env.JWT_SECRET,
+      getJwtSecret(),
       { expiresIn: "30d" }
     );
 

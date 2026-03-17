@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { MessageSquare, Calendar, User, Plus, Briefcase } from "lucide-react";
+import { buildApiUrl } from "@/lib/api";
 
 type BackendStatus = "not_started" | "in_progress" | "completed";
 
@@ -43,8 +44,6 @@ const statusBadge: Record<BackendStatus, JSX.Element> = {
   completed: <span className="status-completed">Completed</span>,
 };
 
-const API = "http://localhost:5000";
-
 const Tasks = () => {
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
@@ -79,7 +78,7 @@ const Tasks = () => {
   const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
 
   const fetchProjects = async () => {
-    const res = await fetch(`${API}/api/projects/my-projects`, { headers });
+    const res = await fetch(buildApiUrl("/api/projects/my-projects"), { headers });
     if (!res.ok) return;
 
     const clientProjects: Project[] = await res.json();
@@ -115,14 +114,14 @@ const Tasks = () => {
   };
 
   const fetchMyTasks = async () => {
-    const res = await fetch(`${API}/api/tasks/mytasks`, { headers });
+    const res = await fetch(buildApiUrl("/api/tasks/mytasks"), { headers });
     if (res.ok) setTasks(await res.json());
   };
 
   const fetchFreelancers = async (projectId: number) => {
     setLoadingFreelancers(true);
     try {
-      const res = await fetch(`${API}/api/tasks/project-freelancers/${projectId}`, { headers });
+      const res = await fetch(buildApiUrl(`/api/tasks/project-freelancers/${projectId}`), { headers });
       if (res.ok) setFreelancers(await res.json());
     } finally {
       setLoadingFreelancers(false);
@@ -130,7 +129,7 @@ const Tasks = () => {
   };
 
   const fetchTasks = async (projectId: number) => {
-    const res = await fetch(`${API}/api/tasks/project/${projectId}`, { headers });
+    const res = await fetch(buildApiUrl(`/api/tasks/project/${projectId}`), { headers });
     if (res.ok) setTasks(await res.json());
   };
 
@@ -139,7 +138,7 @@ const Tasks = () => {
     if (!selectedProject || !selectedFreelancer || !taskName) return;
     setAssigning(true);
     try {
-      const res = await fetch(`${API}/api/tasks/create`, {
+      const res = await fetch(buildApiUrl("/api/tasks/create"), {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -172,7 +171,7 @@ const Tasks = () => {
     if (!selectedTask || !newStatus) return;
     setSaving(true);
     try {
-      const res = await fetch(`${API}/api/tasks/update/${selectedTask.id}`, {
+      const res = await fetch(buildApiUrl(`/api/tasks/update/${selectedTask.id}`), {
         method: "PATCH",
         headers,
         body: JSON.stringify({ status: newStatus, comment }),
