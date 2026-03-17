@@ -1,143 +1,49 @@
 # Collance
 
-A full-stack freelance collaboration platform that connects **clients** and **freelancers** to manage projects, tasks, and communication in one place.
+A full-stack freelance collaboration platform that connects clients and freelancers to manage projects, tasks, and workflows efficiently.
 
 ---
 
 ## Overview
 
-Collance is designed as a simplified freelancing system where users can create projects, assign tasks, manage workflows, and track progress. It focuses on clean UI, role-based functionality, and practical backend concepts.
-
-This project demonstrates real-world implementation of modern web development including authentication, API handling, and database integration.
+Collance allows users to create projects, assign tasks, and track progress with a role-based system. It focuses on practical implementation of authentication, APIs, and database handling.
 
 ---
 
 ## Tech Stack
 
-**Frontend**
-
-* React (Vite)
-* Tailwind CSS
-* Context API
-
-**Backend**
-
-* Node.js
-* Express.js
-
-**Database**
-
-* PostgreSQL (Neon)
-
-**Authentication**
-
-* JWT (JSON Web Tokens)
-* Google OAuth
+**Frontend:** React (Vite), Tailwind CSS
+**Backend:** Node.js, Express.js
+**Database:** PostgreSQL (Neon)
+**Auth:** JWT, Google OAuth
 
 ---
 
 ## Features
 
-### Authentication & User Management
-
-* User signup and login
-* Google authentication integration
+* User authentication (Email + Google)
 * Role-based access (Client / Freelancer)
-* Profile creation and updates
-
----
-
-### Project Management (Client)
-
-* Create and manage projects
-* Assign freelancers to projects
-* View project details and progress
-
----
-
-### Task Management
-
-* Create tasks within projects
-* Assign tasks to freelancers
-* Update task status (pending, in-progress, completed)
-* Filter tasks based on project and user
-
----
-
-### Notifications
-
-* Updates for proposals and tasks
-* Centralized notification handling using context
-
----
-
-### Dashboard
-
-* Role-based dashboard (Client / Freelancer)
-* Displays key statistics:
-
-  * Total projects
-  * Completed tasks
-  * Active work
-
----
-
-### Public Profile Features
-
-* View other user profiles
-* Display creator information
-* Public visibility of shared content
-
----
-
-### Settings
-
-* Update profile details
-* Manage user preferences
+* Project creation and management
+* Task assignment and status tracking
+* Dashboard with project and task insights
+* User profiles and basic settings
+* Notification handling
 
 ---
 
 ## How It Works
 
-### 1. Authentication Flow
-
-* User signs up or logs in
-* JWT token is generated and used for authentication
-* Protected routes are secured using middleware
-
----
-
-### 2. Role-Based System
-
-* **Client**: Creates and manages projects
-* **Freelancer**: Works on assigned tasks
-
----
-
-### 3. Project & Task Flow
-
-1. Client creates a project
-2. Tasks are added under the project
-3. Freelancers are assigned
-4. Freelancers update task status
-5. Dashboard reflects progress
-
----
-
-### 4. Backend Structure
-
-* **Routes** handle API endpoints
-* **Controllers** manage business logic
-* **Middleware** handles authentication and validation
-* **Database (Neon)** stores application data
+1. Users sign up or log in
+2. Clients create projects and add tasks
+3. Freelancers are assigned tasks
+4. Task status is updated as work progresses
+5. Dashboard reflects overall activity
 
 ---
 
 ## Environment Variables
 
-Create a `.env` file in both frontend and backend.
-
-### Backend
+**Backend**
 
 ```
 DATABASE_URL=your_neon_database_url
@@ -145,7 +51,7 @@ JWT_SECRET=your_secret_key
 GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
-### Frontend
+**Frontend**
 
 ```
 VITE_API_URL=your_backend_url
@@ -161,30 +67,24 @@ VITE_API_URL=your_backend_url
 
 ---
 
-## Installation & Setup
+## Setup
 
-### 1. Clone the repository
-
-```
-git clone https://github.com/your-username/collance.git
+```bash
+git clone https://github.com/AnxhDarji/collance.git
 cd collance
 ```
 
----
+**Frontend**
 
-### 2. Install dependencies
-
-Frontend:
-
-```
+```bash
 cd client
 npm install
 npm run dev
 ```
 
-Backend:
+**Backend**
 
-```
+```bash
 cd server
 npm install
 npm run dev
@@ -192,35 +92,6 @@ npm run dev
 
 ---
 
-### 3. Configure environment variables
-
-Add `.env` files as described above.
-
----
-
-## Future Improvements
-
-* Real-time chat system
-* Payment integration
-* Advanced search and filtering
-* UI/UX enhancements
-* Notifications using WebSockets
-
----
-
 ## Author
 
-**Anshkumar Darji**
-Computer Engineering Student
-
----
-
-## License
-
-This project is for educational and portfolio purposes.
-
----
-
-## Final Note
-
-This project focuses on learning and implementation of full-stack concepts rather than production-level scalability. It demonstrates strong fundamentals in building and deploying a real-world application.
+Anshkumar Darji
