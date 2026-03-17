@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Briefcase, Users, UserPlus, CheckSquare, TrendingUp, ArrowUpRight } from "lucide-react";
+import { Briefcase, Users, UserPlus, CheckSquare, ArrowUpRight } from "lucide-react";
 import { buildApiUrl } from "@/lib/api";
 
 type BackendStatus = "not_started" | "in_progress" | "completed";
@@ -134,10 +134,10 @@ const Dashboard = () => {
 
   const stats = useMemo(
     () => [
-      { label: "Total Projects", value: String(counts.totalProjects), icon: Briefcase, change: "+2 this month" },
-      { label: "Active Freelancers", value: String(counts.activeFreelancers), icon: Users, change: "+5 this week" },
-      { label: "Pending Requests", value: String(counts.pendingRequests), icon: UserPlus, change: "3 new today" },
-      { label: "Completed Tasks", value: String(counts.completedTasks), icon: CheckSquare, change: "+18 this week" },
+      { label: "Total Projects", value: String(counts.totalProjects), icon: Briefcase },
+      { label: "Active Freelancers", value: String(counts.activeFreelancers), icon: Users },
+      { label: "Pending Requests", value: String(counts.pendingRequests), icon: UserPlus },
+      { label: "Completed Tasks", value: String(counts.completedTasks), icon: CheckSquare },
     ],
     [counts],
   );
@@ -167,9 +167,6 @@ const Dashboard = () => {
               )}
             </p>
             <p className="text-sm text-muted-foreground">{s.label}</p>
-            <p className="text-xs text-success mt-1 flex items-center gap-1">
-              <TrendingUp size={12} /> {s.change}
-            </p>
           </div>
         ))}
       </div>
